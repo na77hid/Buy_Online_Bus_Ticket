@@ -1,244 +1,108 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>বাস টিকেট বুকিং</title>
-    <style>
-        /* CSS ঠিক রাখা হয়েছে */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            height: 100vh;
-        }
-        .headline {
-            text-align: center;
-            background-color: #f5f5f5;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .headline h2 {
-            margin: 0;
-            font-size: 24px;
-            color: #333;
-        }
-        .headline p {
-            margin: 5px 0;
-            font-size: 16px;
-            color: #555;
-        }
-        .container {
-            background: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 100%;
-            position: relative;
-        }
-        .entry {
-            position: absolute;
-            top: -30px;
-            left: 5px;
-            background: #2196f3;
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .driver {
-            position: absolute;
-            top: -30px;
-            right: 5px;
-            background: #000;
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .seats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-            margin-top: 40px;
-        }
-        .seat {
-            width: 30px;
-            height: 30px;
-            background: #ddd;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .seat.selected {
-            background: #4caf50;
-            color: #fff;
-        }
-        .seat.occupied {
-            background: #e74c3c;
-            cursor: not-allowed;
-        }
-        .form {
-            margin-top: 20px;
-        }
-        .form input {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .form button {
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .form button:hover {
-            background: #45a049;
-        }
-    </style>
-</head>
-<body>
-    <div class="headline">
-        <h2>বাস ভ্রমণ-২০২৫</h2>
-        <p>স্থানঃ সিংড়া টু লালপুর</p>
-        <p>তারিখঃ ০৮ ফেব্রুয়ারি ২০২৫</p>
-        <p>রোজঃ শনিবার</p>
-        <p><strong>*টিকেট প্রাইজ ৪৫০/-টাকা (প্রতিসিট)*</strong></p>
-    </div>
-    <div class="container">
-        <div class="entry">প্রবেশ গেট</div>
-        <div class="driver">ড্রাইভার</div>
-        <h1>Bus Ticket Booking</h1>
-        <div class="seats" id="seatContainer"></div>
-        <div class="form" id="passengerForm" style="display: none;">
-            <h3>Passenger Information</h3>
-            <input type="text" id="name" placeholder="Name" required>
-            <input type="text" id="phone" placeholder="Phone Number" required>
-            <button id="saveButton">Save</button>
-        </div>
-    </div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
+    import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
+    const firebaseConfig = {
+        apiKey: "AIzaSyAgaXEJG4OcAxfD2-B5H8ZjV6DOohh0Iu8",
+        authDomain: "online-bus-ticket-afcfb.firebaseapp.com",
+        databaseURL: "https://online-bus-ticket-afcfb-default-rtdb.firebaseio.com",
+        projectId: "online-bus-ticket-afcfb",
+        storageBucket: "online-bus-ticket-afcfb.appspot.com",
+        messagingSenderId: "652012576413",
+        appId: "1:652012576413:web:c512be1f3891d854afbe74",
+        measurementId: "G-BNR9Y1VXTE"
+    };
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAgaXEJG4OcAxfD2-B5H8ZjV6DOohh0Iu8",
-            authDomain: "online-bus-ticket-afcfb.firebaseapp.com",
-            databaseURL: "https://online-bus-ticket-afcfb-default-rtdb.firebaseio.com",
-            projectId: "online-bus-ticket-afcfb",
-            storageBucket: "online-bus-ticket-afcfb.appspot.com",
-            messagingSenderId: "652012576413",
-            appId: "1:652012576413:web:c512be1f3891d854afbe74",
-            measurementId: "G-BNR9Y1VXTE"
-        };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    const seatContainer = document.getElementById('seatContainer');
+    const saveButton = document.getElementById('saveButton');
+    const nameInput = document.getElementById('name');
+    const phoneInput = document.getElementById('phone');
+    const passengerForm = document.getElementById('passengerForm');
 
-        const seatContainer = document.getElementById('seatContainer');
-        const saveButton = document.getElementById('saveButton');
-        const nameInput = document.getElementById('name');
-        const phoneInput = document.getElementById('phone');
-        const passengerForm = document.getElementById('passengerForm');
+    let selectedSeats = [];
 
-        let selectedSeats = [];
+    // Generate seats dynamically
+    const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const cols = ['1', '2', '3', '4'];
 
-        // Generate seats dynamically
-        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-        const cols = ['1', '2', '3', '4'];
-
-        rows.forEach(row => {
-            cols.forEach(col => {
-                const seat = document.createElement('div');
-                seat.classList.add('seat');
-                seat.textContent = `${row}${col}`;
-                seat.addEventListener('click', () => {
-                    if (seat.classList.contains('occupied')) {
-                        alert('This seat is already occupied!');
-                        return;
-                    }
-
-                    if (seat.classList.contains('selected')) {
-                        seat.classList.remove('selected');
-                        selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
-                    } else {
-                        seat.classList.add('selected');
-                        selectedSeats.push(seat.textContent);
-                    }
-                    passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
-                });
-                seatContainer.appendChild(seat);
-            });
-        });
-
-        // Initialize seats from Firebase
-        function initializeSeats() {
-            const seatsRef = ref(db, 'seats');
-            onValue(seatsRef, snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    Object.keys(data).forEach(seat => {
-                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                        if (seatElement) {
-                            seatElement.classList.add('occupied');
-                        }
-                    });
+    rows.forEach(row => {
+        cols.forEach(col => {
+            const seat = document.createElement('div');
+            seat.classList.add('seat');
+            seat.textContent = `${row}${col}`;
+            seat.addEventListener('click', () => {
+                if (seat.classList.contains('occupied')) {
+                    alert('This seat is already occupied!');
+                    return;
                 }
+
+                if (seat.classList.contains('selected')) {
+                    seat.classList.remove('selected');
+                    selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
+                } else {
+                    seat.classList.add('selected');
+                    selectedSeats.push(seat.textContent);
+                }
+                passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
             });
+            seatContainer.appendChild(seat);
+        });
+    });
+
+    // Initialize seats from Firebase
+    function initializeSeats() {
+        const seatsRef = ref(db, 'seats');
+        onValue(seatsRef, snapshot => {
+            const data = snapshot.val();
+            if (data) {
+                Object.keys(data).forEach(seat => {
+                    const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                    if (seatElement) {
+                        seatElement.classList.add('occupied');
+                    }
+                });
+            }
+        });
+    }
+
+    saveButton.addEventListener('click', () => {
+        const name = nameInput.value;
+        const phone = phoneInput.value;
+
+        if (!name || !phone || selectedSeats.length === 0) {
+            alert('Please fill out all fields and select seats.');
+            return;
         }
 
-        saveButton.addEventListener('click', () => {
-            const name = nameInput.value;
-            const phone = phoneInput.value;
-
-            if (!name || !phone || selectedSeats.length === 0) {
-                alert('Please fill out all fields and select seats.');
-                return;
-            }
-
-            const updates = {};
-            selectedSeats.forEach(seat => {
-                updates[seat] = { name, phone };
-            });
-
-            set(ref(db, 'seats'), updates)
-                .then(() => {
-                    alert('Booking successful!');
-                    selectedSeats.forEach(seat => {
-                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                        if (seatElement) {
-                            seatElement.classList.add('occupied');
-                        }
-                    });
-                    selectedSeats = [];
-                    nameInput.value = '';
-                    phoneInput.value = '';
-                    passengerForm.style.display = 'none';
-                })
-                .catch(error => {
-                    alert('Error saving booking: ' + error.message);
-                });
+        const updates = {};
+        selectedSeats.forEach(seat => {
+            updates[`seats/${seat}`] = { name, phone };
         });
 
-        // Initialize seats on page load
-        initializeSeats();
-    </script>
-</body>
-</html>
+        // Update Firebase with new bookings
+        update(ref(db), updates)
+            .then(() => {
+                alert('Booking successful!');
+                selectedSeats.forEach(seat => {
+                    const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                    if (seatElement) {
+                        seatElement.classList.add('occupied');
+                        seatElement.classList.remove('selected');
+                    }
+                });
+                selectedSeats = [];
+                nameInput.value = '';
+                phoneInput.value = '';
+                passengerForm.style.display = 'none';
+            })
+            .catch(error => {
+                alert('Error saving booking: ' + error.message);
+            });
+    });
+
+    // Initialize seats on page load
+    initializeSeats();
+</script>
