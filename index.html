@@ -11,9 +11,24 @@
             padding: 0;
             background-color: #f4f4f9;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+        }
+        .header {
+            text-align: center;
+            background-color: #2196f3;
+            color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 5px 0;
+            font-size: 16px;
         }
         .container {
             background: #fff;
@@ -104,6 +119,13 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>বাস ভ্রমণ-২০২৫</h1>
+        <p>স্থানঃ সিংড়া টু লালপুর</p>
+        <p>তারিখঃ ০৮ ফেব্রুয়ারি ২০২৫</p>
+        <p>রোজঃ শনিবার</p>
+        <p>*টিকেট প্রাইজ ৪৫০/-টাকা (প্রতিসিট)*</p>
+    </div>
     <div class="container">
         <div class="entry">প্রবেশ গেট</div>
         <div class="driver">ড্রাইভার</div>
@@ -120,18 +142,22 @@
             <input type="text" id="phone" placeholder="Phone Number" required>
             <button id="saveButton">Save</button>
         </div>
+        <div class="passenger-info" id="passengerInfo" style="display: none;">
+            <h3>Passenger Details</h3>
+            <p id="passengerDetails"></p>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAgaXEJG4OcAxfD2-B5H8ZjV6DOohh0Iu8",
             authDomain: "online-bus-ticket-afcfb.firebaseapp.com",
             databaseURL: "https://online-bus-ticket-afcfb-default-rtdb.firebaseio.com",
             projectId: "online-bus-ticket-afcfb",
-            storageBucket: "online-bus-ticket-afcfb.appspot.com",
+            storageBucket: "online-bus-ticket-afcfb.firebasestorage.app",
             messagingSenderId: "652012576413",
             appId: "1:652012576413:web:c512be1f3891d854afbe74",
             measurementId: "G-BNR9Y1VXTE"
@@ -141,14 +167,14 @@
         const db = getDatabase(app);
 
         const seatContainer = document.getElementById('seatContainer');
+        const selectedSeatsText = document.getElementById('selectedSeats');
+        const passengerForm = document.getElementById('passengerForm');
         const saveButton = document.getElementById('saveButton');
         const nameInput = document.getElementById('name');
         const phoneInput = document.getElementById('phone');
-        const passengerForm = document.getElementById('passengerForm');
 
         let selectedSeats = [];
 
-        // Generate seats dynamically
         const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         const cols = ['1', '2', '3', '4'];
 
@@ -170,13 +196,13 @@
                         seat.classList.add('selected');
                         selectedSeats.push(seat.textContent);
                     }
+                    selectedSeatsText.textContent = selectedSeats.join(', ');
                     passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
                 });
                 seatContainer.appendChild(seat);
             });
         });
 
-        // Initialize seats from Firebase
         function initializeSeats() {
             const seatsRef = ref(db, 'seats');
             onValue(seatsRef, snapshot => {
@@ -203,31 +229,30 @@
 
             const updates = {};
             selectedSeats.forEach(seat => {
-                updates[`seats/${seat}`] = { name, phone };
+                updates[seat] = { name, phone };
             });
 
-            // Update Firebase with new bookings
-            update(ref(db), updates)
+            const seatsRef = ref(db, 'seats');
+            set(seatsRef, updates)
                 .then(() => {
                     alert('Booking successful!');
                     selectedSeats.forEach(seat => {
                         const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
                         if (seatElement) {
                             seatElement.classList.add('occupied');
-                            seatElement.classList.remove('selected');
                         }
                     });
                     selectedSeats = [];
+                    selectedSeatsText.textContent = '0';
+                    passengerForm.style.display = 'none';
                     nameInput.value = '';
                     phoneInput.value = '';
-                    passengerForm.style.display = 'none';
                 })
                 .catch(error => {
                     alert('Error saving booking: ' + error.message);
                 });
         });
 
-        // Initialize seats on page load
         initializeSeats();
     </script>
 </body>
