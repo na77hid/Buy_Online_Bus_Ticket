@@ -24,31 +24,11 @@
             width: 100%;
             position: relative;
         }
-        .driver {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #000;
-            color: #fff;
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .entry {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #2196f3;
-            color: #fff;
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
         .seats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 5px; /* সিটের দূরত্ব কমানো হয়েছে */
-            margin: 60px 0 20px;
+            gap: 5px;
+            margin: 20px 0;
         }
         .seat {
             width: 40px;
@@ -67,9 +47,6 @@
         .seat.occupied {
             background: #e74c3c;
             cursor: not-allowed;
-        }
-        .info {
-            margin-top: 10px;
         }
         .form {
             margin-top: 20px;
@@ -90,60 +67,48 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        .form button:hover {
-            background: #45a049;
-        }
-        .passenger-info {
-            margin-top: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 4px;
-            background: #f9f9f9;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="driver">Driver</div>
-        <div class="entry">Entry</div>
         <h1>Bus Ticket Booking</h1>
         <div class="seats" id="seatContainer">
             <!-- Seats will be dynamically generated here -->
         </div>
-        <div class="info">
-            <p>Selected Seats: <span id="selectedSeats">0</span></p>
-        </div>
-        <div class="form" id="passengerForm">
+        <div class="form" id="passengerForm" style="display: none;">
             <h3>Passenger Information</h3>
             <input type="text" id="name" placeholder="Name" required>
-            <input type="text" id="address" placeholder="Address" required>
             <input type="text" id="phone" placeholder="Phone Number" required>
-            <input type="email" id="email" placeholder="Email" required>
-            <button onclick="savePassengerInfo()">Save</button>
-        </div>
-        <div class="passenger-info" id="passengerInfo" style="display: none;">
-            <h3>Passenger Details</h3>
-            <p id="passengerDetails"></p>
+            <button onclick="saveBooking()">Save Booking</button>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        // Firebase configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgaXEJG4OcAxfD2-B5H8ZjV6DOohh0Iu8",
+            authDomain: "online-bus-ticket-afcfb.firebaseapp.com",
+            databaseURL: "https://online-bus-ticket-afcfb-default-rtdb.firebaseio.com",
+            projectId: "online-bus-ticket-afcfb",
+            storageBucket: "online-bus-ticket-afcfb.firebasestorage.app",
+            messagingSenderId: "652012576413",
+            appId: "1:652012576413:web:c512be1f3891d854afbe74"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         const seatContainer = document.getElementById('seatContainer');
-        const selectedSeatsText = document.getElementById('selectedSeats');
         const passengerForm = document.getElementById('passengerForm');
-        const passengerInfo = document.getElementById('passengerInfo');
-        const passengerDetails = document.getElementById('passengerDetails');
-
         const nameInput = document.getElementById('name');
-        const addressInput = document.getElementById('address');
         const phoneInput = document.getElementById('phone');
-        const emailInput = document.getElementById('email');
-
         let selectedSeats = [];
-        const googleScriptURL = "https://script.google.com/macros/s/AKfycbwS9eU4P7oUydg_7X3UH4H6QWldLP1cM0cfUlsuY-zKbSr6ortc2dRMw1sv-kDMYn8/exec";
 
-        // Generate 40 seats dynamically
-        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        // Generate seats
+        const rows = ['A', 'B', 'C', 'D', 'E'];
         const cols = ['1', '2', '3', '4'];
 
         rows.forEach(row => {
@@ -156,7 +121,6 @@
                         alert('This seat is already occupied!');
                         return;
                     }
-
                     if (seat.classList.contains('selected')) {
                         seat.classList.remove('selected');
                         selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
@@ -164,88 +128,64 @@
                         seat.classList.add('selected');
                         selectedSeats.push(seat.textContent);
                     }
-                    selectedSeatsText.textContent = selectedSeats.join(', ');
                     passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
                 });
                 seatContainer.appendChild(seat);
             });
         });
 
-        function initializeSeats() {
-            fetch(googleScriptURL)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.seats) {
-                        data.seats.forEach(seat => {
-                            const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                            if (seatElement) {
-                                seatElement.classList.add('occupied');
-                            }
-                        });
-                    }
+        // Load occupied seats
+        function loadSeats() {
+            const seatRef = ref(db, 'seats');
+            onValue(seatRef, snapshot => {
+                const data = snapshot.val();
+                if (data) {
+                    Object.keys(data).forEach(seat => {
+                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                        if (seatElement) {
+                            seatElement.classList.add('occupied');
+                        }
+                    });
+                }
+            });
+        }
+
+        // Save booking
+        function saveBooking() {
+            const name = nameInput.value;
+            const phone = phoneInput.value;
+
+            if (!name || !phone || selectedSeats.length === 0) {
+                alert('Please fill out all fields and select seats.');
+                return;
+            }
+
+            const updates = {};
+            selectedSeats.forEach(seat => {
+                updates[`seats/${seat}`] = { name, phone };
+            });
+
+            set(ref(db), updates)
+                .then(() => {
+                    alert('Booking successful!');
+                    selectedSeats.forEach(seat => {
+                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                        if (seatElement) {
+                            seatElement.classList.add('occupied');
+                        }
+                    });
+                    selectedSeats = [];
+                    passengerForm.style.display = 'none';
+                    nameInput.value = '';
+                    phoneInput.value = '';
+                })
+                .catch(error => {
+                    alert('Error saving booking: ' + error.message);
                 });
         }
 
-       function savePassengerInfo() {
-    const name = nameInput.value;
-    const address = addressInput.value;
-    const phone = phoneInput.value;
-    const email = emailInput.value;
-
-    if (name && address && phone && email && selectedSeats.length > 0) {
-        fetch(googleScriptURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            mode: 'cors', // CORS সমর্থন সক্রিয়
-            body: JSON.stringify({
-                seats: selectedSeats,
-                name,
-                address,
-                phone,
-                email
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                alert('Booking Successful!');
-                passengerDetails.innerHTML = `
-                    <strong>Name:</strong> ${name}<br>
-                    <strong>Address:</strong> ${address}<br>
-                    <strong>Phone:</strong> ${phone}<br>
-                    <strong>Email:</strong> ${email}<br>
-                    <strong>Seats:</strong> ${selectedSeats.join(', ')}
-                `;
-                passengerInfo.style.display = 'block';
-                selectedSeats.forEach(seat => {
-                    const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                    if (seatElement) {
-                        seatElement.classList.add('occupied');
-                    }
-                });
-                selectedSeats = [];
-                selectedSeatsText.textContent = '0';
-                passengerForm.style.display = 'none';
-                nameInput.value = '';
-                addressInput.value = '';
-                phoneInput.value = '';
-                emailInput.value = '';
-            } else {
-                alert('Error saving booking: ' + data.message);
-            }
-        })
-        .catch(error => {
-            alert('Error: ' + error.message);
-        });
-    } else {
-        alert('Please fill out all fields.');
-    }
-}
-
-        // Initialize seats from Google Sheet on page load
-        initializeSeats();
+        // Initialize seats
+        loadSeats();
     </script>
 </body>
 </html>
