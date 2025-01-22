@@ -1,167 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buy Online Bus Ticket</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-    }
-    header {
-      background-color: #007bff;
-      color: white;
-      text-align: center;
-      padding: 15px;
-    }
-    main {
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .seats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .seat {
-      padding: 10px;
-      text-align: center;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      cursor: pointer;
-      background-color: #f4f4f4;
-    }
-    .seat.booked {
-      background-color: #ff4d4d;
-      color: white;
-      cursor: not-allowed;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    form input, form button {
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-    form button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    form button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Ticket Booking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            position: relative;
+        }
+        .driver {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #000;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .entry {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #2196f3;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .seats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 60px 0 20px;
+        }
+        .seat {
+            width: 50px;
+            height: 50px;
+            background: #ddd;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .seat.selected {
+            background: #4caf50;
+            color: #fff;
+        }
+        .seat.occupied {
+            background: #e74c3c;
+            cursor: not-allowed;
+        }
+        .info {
+            margin-top: 10px;
+        }
+        .form {
+            margin-top: 20px;
+        }
+        .form input {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form button:hover {
+            background: #45a049;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>Online Bus Ticket Booking</h1>
-  </header>
-  <main>
-    <div class="seats" id="seatsContainer"></div>
-    <form id="ticketForm">
-      <label for="name">Name</label>
-      <input type="text" id="name" placeholder="Enter your name" required>
-      
-      <label for="email">Email</label>
-      <input type="email" id="email" placeholder="Enter your email" required>
-      
-      <label for="phone">Phone</label>
-      <input type="tel" id="phone" placeholder="Enter your phone number" required>
-      
-      <label for="seat">Seat Number</label>
-      <input type="text" id="seat" placeholder="Enter seat number" readonly required>
-      
-      <button type="submit">Save</button>
-    </form>
-  </main>
+    <div class="container">
+        <div class="driver">Driver</div>
+        <div class="entry">Entry</div>
+        <h1>Bus Ticket Booking</h1>
+        <div class="seats" id="seatContainer">
+            <!-- Seats will be dynamically generated here -->
+        </div>
+        <div class="info">
+            <p>Selected Seats: <span id="selectedSeats">0</span></p>
+        </div>
+        <div class="form" id="passengerForm" style="display: none;">
+            <h3>Passenger Information</h3>
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="text" id="address" placeholder="Address" required>
+            <input type="text" id="phone" placeholder="Phone Number" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <button onclick="savePassengerInfo()">Save</button>
+        </div>
+    </div>
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwqY15mPblw-ZjpDKeCUiRn1EAfSdWL7DATvLogpw5UZrWGbmRurzsPU53PdNlbdt5K/exec";
+    <script>
+        const seatContainer = document.getElementById('seatContainer');
+        const selectedSeatsText = document.getElementById('selectedSeats');
+        const passengerForm = document.getElementById('passengerForm');
+        const nameInput = document.getElementById('name');
+        const addressInput = document.getElementById('address');
+        const phoneInput = document.getElementById('phone');
+        const emailInput = document.getElementById('email');
 
-    const seatsContainer = document.getElementById("seatsContainer");
-    const seatInput = document.getElementById("seat");
+        let selectedSeats = [];
+        const googleScriptURL = "YOUR_GOOGLE_SHEET_API_URL"; // Replace with your Google Apps Script URL
 
-    // Fetch and display seats
-    async function fetchSeats() {
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
+        // Generate 40 seats dynamically
+        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        const cols = ['1', '2', '3', '4'];
 
-        seatsContainer.innerHTML = "";
-        data.seats.forEach((seat) => {
-          const seatDiv = document.createElement("div");
-          seatDiv.classList.add("seat");
-          seatDiv.textContent = seat.number;
+        rows.forEach(row => {
+            cols.forEach(col => {
+                const seat = document.createElement('div');
+                seat.classList.add('seat');
+                seat.textContent = `${row}${col}`;
+                seat.addEventListener('click', () => {
+                    if (seat.classList.contains('occupied')) {
+                        alert('This seat is already occupied!');
+                        return;
+                    }
 
-          if (seat.booked) {
-            seatDiv.classList.add("booked");
-          } else {
-            seatDiv.addEventListener("click", () => {
-              seatInput.value = seat.number;
+                    if (seat.classList.contains('selected')) {
+                        seat.classList.remove('selected');
+                        selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
+                    } else {
+                        seat.classList.add('selected');
+                        selectedSeats.push(seat.textContent);
+                    }
+                    selectedSeatsText.textContent = selectedSeats.join(', ');
+                    passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
+                });
+                seatContainer.appendChild(seat);
             });
-          }
-
-          seatsContainer.appendChild(seatDiv);
-        });
-      } catch (error) {
-        console.error("Error fetching seats:", error);
-      }
-    }
-
-    // Submit booking
-    document.getElementById("ticketForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
-      const phone = document.getElementById("phone").value;
-      const seat = seatInput.value;
-
-      if (!seat) {
-        alert("Please select a seat!");
-        return;
-      }
-
-      const payload = { name, email, phone, seat };
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
         });
 
-        const result = await response.json();
-
-        if (result.status === "success") {
-          alert("Booking successful!");
-          document.getElementById("ticketForm").reset();
-          fetchSeats();
-        } else {
-          alert("Failed to book seat. Please try again.");
+        function initializeSeats() {
+            fetch(googleScriptURL)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(seat => {
+                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                        if (seatElement) {
+                            seatElement.classList.add('occupied');
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching seat data:', error));
         }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("An error occurred. Please try again later.");
-      }
-    });
 
-    // Initial fetch
-    fetchSeats();
-  </script>
+        function savePassengerInfo() {
+            const name = nameInput.value;
+            const address = addressInput.value;
+            const phone = phoneInput.value;
+            const email = emailInput.value;
+
+            if (name && address && phone && email && selectedSeats.length > 0) {
+                fetch(googleScriptURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        seats: selectedSeats,
+                        name,
+                        address,
+                        phone,
+                        email
+                    }),
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Booking Successful!');
+                        selectedSeats.forEach(seat => {
+                            const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                            if (seatElement) {
+                                seatElement.classList.add('occupied');
+                            }
+                        });
+                        selectedSeats = [];
+                        selectedSeatsText.textContent = '0';
+                        passengerForm.style.display = 'none';
+                        nameInput.value = '';
+                        addressInput.value = '';
+                        phoneInput.value = '';
+                        emailInput.value = '';
+                    } else {
+                        throw new Error('Failed to save booking');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving booking:', error);
+                    alert('An error occurred while saving your booking. Please try again.');
+                });
+            } else {
+                alert('Please fill out all fields.');
+            }
+        }
+
+        // Initialize seats from Google Sheet on page load
+        initializeSeats();
+    </script>
 </body>
 </html>
