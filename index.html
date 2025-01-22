@@ -47,7 +47,7 @@
         .seats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 4px; /* সিটের দূরত্ব কমানো হয়েছে */
+            gap: 4px;
             margin-top: 40px;
         }
         .seat {
@@ -118,7 +118,7 @@
             <h3>Passenger Information</h3>
             <input type="text" id="name" placeholder="Name" required>
             <input type="text" id="phone" placeholder="Phone Number" required>
-            <button onclick="saveBooking()">Save</button>
+            <button id="saveButton">Save</button>
         </div>
         <div class="passenger-info" id="passengerInfo" style="display: none;">
             <h3>Passenger Details</h3>
@@ -149,6 +149,7 @@
         const passengerForm = document.getElementById('passengerForm');
         const passengerInfo = document.getElementById('passengerInfo');
         const passengerDetails = document.getElementById('passengerDetails');
+        const saveButton = document.getElementById('saveButton');
 
         const nameInput = document.getElementById('name');
         const phoneInput = document.getElementById('phone');
@@ -200,7 +201,7 @@
             });
         }
 
-        function saveBooking() {
+        saveButton.addEventListener('click', () => {
             const name = nameInput.value;
             const phone = phoneInput.value;
 
@@ -232,7 +233,7 @@
                 .catch(error => {
                     alert('Error saving booking: ' + error.message);
                 });
-        }
+        });
 
         // Initialize seats on page load
         initializeSeats();
