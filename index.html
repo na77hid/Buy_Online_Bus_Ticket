@@ -20,23 +20,45 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            max-width: 500px;
             width: 100%;
+            position: relative;
+        }
+        .entry {
+            position: absolute;
+            top: -30px;
+            left: 5px;
+            background: #2196f3;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .driver {
+            position: absolute;
+            top: -30px;
+            right: 5px;
+            background: #000;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
         }
         .seats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
-            margin: 20px 0;
+            gap: 4px; /* সিটের দূরত্ব কমানো হয়েছে */
+            margin-top: 40px;
         }
         .seat {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             background: #ddd;
             border-radius: 4px;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-size: 12px;
             cursor: pointer;
         }
         .seat.selected {
@@ -46,6 +68,9 @@
         .seat.occupied {
             background: #e74c3c;
             cursor: not-allowed;
+        }
+        .info {
+            margin-top: 10px;
         }
         .form {
             margin-top: 20px;
@@ -66,28 +91,45 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .form button:hover {
+            background: #45a049;
+        }
+        .passenger-info {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="entry">প্রবেশ গেট</div>
+        <div class="driver">ড্রাইভার</div>
         <h1>Bus Ticket Booking</h1>
         <div class="seats" id="seatContainer">
             <!-- Seats will be dynamically generated here -->
+        </div>
+        <div class="info">
+            <p>Selected Seats: <span id="selectedSeats">0</span></p>
         </div>
         <div class="form" id="passengerForm" style="display: none;">
             <h3>Passenger Information</h3>
             <input type="text" id="name" placeholder="Name" required>
             <input type="text" id="phone" placeholder="Phone Number" required>
-            <button onclick="saveBooking()">Save Booking</button>
+            <button onclick="saveBooking()">Save</button>
+        </div>
+        <div class="passenger-info" id="passengerInfo" style="display: none;">
+            <h3>Passenger Details</h3>
+            <p id="passengerDetails"></p>
         </div>
     </div>
 
     <script type="module">
-        // Import Firebase SDK
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAgaXEJG4OcAxfD2-B5H8ZjV6DOohh0Iu8",
             authDomain: "online-bus-ticket-afcfb.firebaseapp.com",
@@ -99,17 +141,21 @@
             measurementId: "G-BNR9Y1VXTE"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         const seatContainer = document.getElementById('seatContainer');
+        const selectedSeatsText = document.getElementById('selectedSeats');
         const passengerForm = document.getElementById('passengerForm');
+        const passengerInfo = document.getElementById('passengerInfo');
+        const passengerDetails = document.getElementById('passengerDetails');
+
         const nameInput = document.getElementById('name');
         const phoneInput = document.getElementById('phone');
+
         let selectedSeats = [];
 
-        // Generate seats
+        // Generate 40 seats dynamically
         const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         const cols = ['1', '2', '3', '4'];
 
@@ -123,6 +169,7 @@
                         alert('This seat is already occupied!');
                         return;
                     }
+
                     if (seat.classList.contains('selected')) {
                         seat.classList.remove('selected');
                         selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
@@ -130,16 +177,17 @@
                         seat.classList.add('selected');
                         selectedSeats.push(seat.textContent);
                     }
+                    selectedSeatsText.textContent = selectedSeats.join(', ');
                     passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
                 });
                 seatContainer.appendChild(seat);
             });
         });
 
-        // Load occupied seats
-        function loadSeats() {
-            const seatRef = ref(db, 'seats');
-            onValue(seatRef, snapshot => {
+        // Initialize seats from Firebase
+        function initializeSeats() {
+            const seatsRef = ref(db, 'seats');
+            onValue(seatsRef, snapshot => {
                 const data = snapshot.val();
                 if (data) {
                     Object.keys(data).forEach(seat => {
@@ -152,7 +200,6 @@
             });
         }
 
-        // Save booking
         function saveBooking() {
             const name = nameInput.value;
             const phone = phoneInput.value;
@@ -164,10 +211,10 @@
 
             const updates = {};
             selectedSeats.forEach(seat => {
-                updates[`seats/${seat}`] = { name, phone };
+                updates[seat] = { name, phone };
             });
 
-            set(ref(db), updates)
+            set(ref(db, 'seats'), updates)
                 .then(() => {
                     alert('Booking successful!');
                     selectedSeats.forEach(seat => {
@@ -177,6 +224,7 @@
                         }
                     });
                     selectedSeats = [];
+                    selectedSeatsText.textContent = '0';
                     passengerForm.style.display = 'none';
                     nameInput.value = '';
                     phoneInput.value = '';
@@ -186,8 +234,8 @@
                 });
         }
 
-        // Initialize seats
-        loadSeats();
+        // Initialize seats on page load
+        initializeSeats();
     </script>
 </body>
 </html>
