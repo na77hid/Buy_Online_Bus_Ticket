@@ -25,6 +25,25 @@
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+    .seats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .seat {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #f4f4f4;
+    }
+    .seat.booked {
+      background-color: #ff4d4d;
+      color: white;
+      cursor: not-allowed;
+    }
     form {
       display: flex;
       flex-direction: column;
@@ -52,6 +71,7 @@
     <h1>Online Bus Ticket Booking</h1>
   </header>
   <main>
+    <div class="seats" id="seatsContainer"></div>
     <form id="ticketForm">
       <label for="name">Name</label>
       <input type="text" id="name" placeholder="Enter your name" required>
@@ -63,58 +83,85 @@
       <input type="tel" id="phone" placeholder="Enter your phone number" required>
       
       <label for="seat">Seat Number</label>
-      <input type="text" id="seat" placeholder="Enter seat number" required>
+      <input type="text" id="seat" placeholder="Enter seat number" readonly required>
       
       <button type="submit">Save</button>
     </form>
   </main>
 
   <script>
-    // API URL
     const API_URL = "https://script.google.com/macros/s/AKfycbwqY15mPblw-ZjpDKeCUiRn1EAfSdWL7DATvLogpw5UZrWGbmRurzsPU53PdNlbdt5K/exec";
 
+    const seatsContainer = document.getElementById("seatsContainer");
+    const seatInput = document.getElementById("seat");
+
+    // Fetch and display seats
+    async function fetchSeats() {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        seatsContainer.innerHTML = "";
+        data.seats.forEach((seat) => {
+          const seatDiv = document.createElement("div");
+          seatDiv.classList.add("seat");
+          seatDiv.textContent = seat.number;
+
+          if (seat.booked) {
+            seatDiv.classList.add("booked");
+          } else {
+            seatDiv.addEventListener("click", () => {
+              seatInput.value = seat.number;
+            });
+          }
+
+          seatsContainer.appendChild(seatDiv);
+        });
+      } catch (error) {
+        console.error("Error fetching seats:", error);
+      }
+    }
+
+    // Submit booking
     document.getElementById("ticketForm").addEventListener("submit", async (event) => {
       event.preventDefault();
 
       const name = document.getElementById("name").value;
       const email = document.getElementById("email").value;
       const phone = document.getElementById("phone").value;
-      const seat = document.getElementById("seat").value;
+      const seat = seatInput.value;
 
-      if (!name || !email || !phone || !seat) {
-        alert("Please fill out all fields!");
+      if (!seat) {
+        alert("Please select a seat!");
         return;
       }
 
-      const payload = {
-        name,
-        email,
-        phone,
-        seat
-      };
+      const payload = { name, email, phone, seat };
 
       try {
         const response = await fetch(API_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
 
         const result = await response.json();
 
         if (result.status === "success") {
-          alert("Your ticket has been booked successfully!");
+          alert("Booking successful!");
           document.getElementById("ticketForm").reset();
+          fetchSeats();
         } else {
-          alert("Failed to save data. Please try again.");
+          alert("Failed to book seat. Please try again.");
         }
       } catch (error) {
         console.error("Error:", error);
         alert("An error occurred. Please try again later.");
       }
     });
+
+    // Initial fetch
+    fetchSeats();
   </script>
 </body>
 </html>
