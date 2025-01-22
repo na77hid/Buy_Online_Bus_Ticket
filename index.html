@@ -16,12 +16,26 @@
             height: 100vh;
         }
         .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+        }
+        .booking-section {
+            flex: 3;
             background: #fff;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            position: relative;
+        }
+        .info-section {
+            flex: 1;
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: 100%;
         }
         .driver {
             position: absolute;
@@ -47,7 +61,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            margin: 60px 0 20px;
+            margin: 40px 0 20px;
         }
         .seat {
             width: 50px;
@@ -66,9 +80,6 @@
         .seat.occupied {
             background: #e74c3c;
             cursor: not-allowed;
-        }
-        .info {
-            margin-top: 10px;
         }
         .form {
             margin-top: 20px;
@@ -92,42 +103,51 @@
         .form button:hover {
             background: #45a049;
         }
+        .info-section h3 {
+            margin-bottom: 10px;
+        }
+        .passenger-info {
+            background: #f4f4f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="driver">Driver</div>
-        <div class="entry">Entry</div>
-        <h1>Bus Ticket Booking</h1>
-        <div class="seats" id="seatContainer">
-            <!-- Seats will be dynamically generated here -->
+        <div class="booking-section">
+            <h1>Bus Ticket Booking</h1>
+            <div class="seats" id="seatContainer">
+                <!-- Seats will be dynamically generated here -->
+            </div>
+            <div class="form" id="passengerForm" style="display: none;">
+                <h3>Passenger Information</h3>
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="text" id="address" placeholder="Address" required>
+                <input type="text" id="phone" placeholder="Phone Number" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <button onclick="savePassengerInfo()">Save</button>
+            </div>
         </div>
-        <div class="info">
-            <p>Selected Seats: <span id="selectedSeats">0</span></p>
-        </div>
-        <div class="form" id="passengerForm" style="display: none;">
-            <h3>Passenger Information</h3>
-            <input type="text" id="name" placeholder="Name" required>
-            <input type="text" id="address" placeholder="Address" required>
-            <input type="text" id="phone" placeholder="Phone Number" required>
-            <input type="email" id="email" placeholder="Email" required>
-            <button onclick="savePassengerInfo()">Save</button>
+        <div class="info-section">
+            <h3>Passenger Details</h3>
+            <div id="passengerDetails"></div>
         </div>
     </div>
 
     <script>
         const seatContainer = document.getElementById('seatContainer');
-        const selectedSeatsText = document.getElementById('selectedSeats');
         const passengerForm = document.getElementById('passengerForm');
+        const passengerDetails = document.getElementById('passengerDetails');
         const nameInput = document.getElementById('name');
         const addressInput = document.getElementById('address');
         const phoneInput = document.getElementById('phone');
         const emailInput = document.getElementById('email');
+        const googleScriptURL = "https://script.google.com/macros/s/AKfycbxw2yUazbK6PkQayYOC2pWprwBDyChiuxPZ1X3TFvHRIcNT2OzTvZHDJ4qO9woeYxQZ/exec";
 
         let selectedSeats = [];
-        const googleScriptURL = "https://script.google.com/macros/s/AKfycbxfDB5jvh3WXwi-LZl_apCM1v5zAAj-kN5Jmx8JTZndk2e-709ju8qhPR-NTdirVBRx/exec"; // Replace with your Google Apps Script URL
 
-        // Generate 40 seats dynamically
         const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         const cols = ['1', '2', '3', '4'];
 
@@ -141,7 +161,6 @@
                         alert('This seat is already occupied!');
                         return;
                     }
-
                     if (seat.classList.contains('selected')) {
                         seat.classList.remove('selected');
                         selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
@@ -149,7 +168,6 @@
                         seat.classList.add('selected');
                         selectedSeats.push(seat.textContent);
                     }
-                    selectedSeatsText.textContent = selectedSeats.join(', ');
                     passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
                 });
                 seatContainer.appendChild(seat);
@@ -166,8 +184,7 @@
                             seatElement.classList.add('occupied');
                         }
                     });
-                })
-                .catch(error => console.error('Error fetching seat data:', error));
+                });
         }
 
         function savePassengerInfo() {
@@ -187,33 +204,37 @@
                         name,
                         address,
                         phone,
-                        email
+                        email,
                     }),
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Booking Successful!');
-                        selectedSeats.forEach(seat => {
-                            const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                            if (seatElement) {
-                                seatElement.classList.add('occupied');
-                            }
-                        });
-                        selectedSeats = [];
-                        selectedSeatsText.textContent = '0';
-                        passengerForm.style.display = 'none';
-                        nameInput.value = '';
-                        addressInput.value = '';
-                        phoneInput.value = '';
-                        emailInput.value = '';
-                    } else {
-                        throw new Error('Failed to save booking');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error saving booking:', error);
-                    alert('An error occurred while saving your booking. Please try again.');
-                });
+                }).then(response => response.json())
+                  .then(data => {
+                      if (data.error) {
+                          alert(`Error: ${data.error}`);
+                      } else {
+                          alert('Booking Successful!');
+                          selectedSeats.forEach(seat => {
+                              const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                              if (seatElement) {
+                                  seatElement.classList.add('occupied');
+                              }
+                          });
+                          passengerDetails.innerHTML += `
+                              <div class="passenger-info">
+                                  <p><strong>Name:</strong> ${name}</p>
+                                  <p><strong>Seats:</strong> ${selectedSeats.join(', ')}</p>
+                              </div>`;
+                          selectedSeats = [];
+                          passengerForm.style.display = 'none';
+                          nameInput.value = '';
+                          addressInput.value = '';
+                          phoneInput.value = '';
+                          emailInput.value = '';
+                      }
+                  })
+                  .catch(error => {
+                      console.error('Error saving booking:', error);
+                      alert('Error saving booking. Please try again.');
+                  });
             } else {
                 alert('Please fill out all fields.');
             }
