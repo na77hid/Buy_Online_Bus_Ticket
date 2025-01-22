@@ -13,7 +13,26 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
+        }
+        .headline {
+            text-align: center;
+            background-color: #f5f5f5;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .headline h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+        }
+        .headline p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #555;
         }
         .container {
             background: #fff;
@@ -91,27 +110,31 @@
             background: #45a049;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
 </head>
 <body>
+    <div class="headline">
+        <h2>বাস ভ্রমণ-২০২৫</h2>
+        <p>স্থানঃ সিংড়া টু লালপুর</p>
+        <p>তারিখঃ ০৮ ফেব্রুয়ারি ২০২৫</p>
+        <p>রোজঃ শনিবার</p>
+        <p><strong>*টিকেট প্রাইজ ৪৫০/-টাকা (প্রতিসিট)*</strong></p>
+    </div>
     <div class="container">
         <div class="driver">Driver</div>
         <div class="entry">Entry</div>
         <h1>Bus Ticket Booking</h1>
-        <div class="seats" id="seatContainer">
-            <!-- Seats will be dynamically generated here -->
-        </div>
-        <div class="form" id="bookingForm" style="display: none;">
+        <div class="seats" id="seatContainer"></div>
+        <div class="form">
             <h3>Passenger Information</h3>
             <input type="text" id="name" placeholder="Name" required>
             <input type="text" id="phone" placeholder="Phone Number" required>
             <button onclick="saveBooking()">Save</button>
         </div>
     </div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
     <script>
-        // Firebase Configuration
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAgaXEJG4OcAxfD2-B5H8ZjV6DOohh0Iu8",
             authDomain: "online-bus-ticket-afcfb.firebaseapp.com",
@@ -125,84 +148,62 @@
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const database = firebase.database();
 
         const seatContainer = document.getElementById('seatContainer');
-        const bookingForm = document.getElementById('bookingForm');
-        const nameInput = document.getElementById('name');
-        const phoneInput = document.getElementById('phone');
-
-        let selectedSeat = null;
-
-        // Generate seats dynamically
         const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         const cols = ['1', '2', '3', '4'];
 
+        let selectedSeats = [];
+
+        // Generate seats
         rows.forEach(row => {
             cols.forEach(col => {
                 const seat = document.createElement('div');
                 seat.classList.add('seat');
                 seat.textContent = `${row}${col}`;
-                seat.addEventListener('click', () => selectSeat(seat));
+                seat.addEventListener('click', () => {
+                    if (seat.classList.contains('occupied')) return;
+                    if (seat.classList.contains('selected')) {
+                        seat.classList.remove('selected');
+                        selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
+                    } else {
+                        seat.classList.add('selected');
+                        selectedSeats.push(seat.textContent);
+                    }
+                });
                 seatContainer.appendChild(seat);
             });
         });
 
-        function selectSeat(seat) {
-            if (seat.classList.contains('occupied')) {
-                alert('This seat is already occupied!');
-                return;
-            }
-
-            if (selectedSeat) {
-                selectedSeat.classList.remove('selected');
-            }
-
-            seat.classList.add('selected');
-            selectedSeat = seat;
-            bookingForm.style.display = 'block';
-        }
-
         function saveBooking() {
-            const name = nameInput.value;
-            const phone = phoneInput.value;
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
 
-            if (!name || !phone || !selectedSeat) {
-                alert('Please fill out all fields and select a seat.');
+            if (!name || !phone || selectedSeats.length === 0) {
+                alert('Please fill all fields and select at least one seat.');
                 return;
             }
 
-            const seatId = selectedSeat.textContent;
+            const bookingData = {
+                name,
+                phone,
+                seats: selectedSeats
+            };
 
-            // Save to Firebase
-            firebase.database().ref(`seats/${seatId}`).set({
-                name: name,
-                phone: phone
-            }).then(() => {
-                alert('Booking successful!');
-                selectedSeat.classList.remove('selected');
-                selectedSeat.classList.add('occupied');
-                selectedSeat = null;
-                bookingForm.style.display = 'none';
-                nameInput.value = '';
-                phoneInput.value = '';
+            firebase.database().ref('bookings').push(bookingData).then(() => {
+                alert('Booking saved successfully!');
+                selectedSeats.forEach(seat => {
+                    const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                    if (seatElement) seatElement.classList.add('occupied');
+                });
+                selectedSeats = [];
+                document.getElementById('name').value = '';
+                document.getElementById('phone').value = '';
             }).catch(error => {
                 alert('Error saving booking: ' + error.message);
             });
         }
-
-        // Initialize seats from Firebase
-        firebase.database().ref('seats').on('value', snapshot => {
-            const seats = snapshot.val();
-            if (seats) {
-                Object.keys(seats).forEach(seatId => {
-                    const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seatId);
-                    if (seatElement) {
-                        seatElement.classList.add('occupied');
-                    }
-                });
-            }
-        });
     </script>
 </body>
 </html>
