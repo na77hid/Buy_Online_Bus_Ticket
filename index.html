@@ -1,217 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Ticket Booking</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            position: relative;
-        }
-        .driver {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #000;
-            color: #fff;
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .entry {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #2196f3;
-            color: #fff;
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .seats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin: 60px 0 20px;
-        }
-        .seat {
-            width: 50px;
-            height: 50px;
-            background: #ddd;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-        .seat.selected {
-            background: #4caf50;
-            color: #fff;
-        }
-        .seat.occupied {
-            background: #e74c3c;
-            cursor: not-allowed;
-        }
-        .info {
-            margin-top: 10px;
-        }
-        .form {
-            margin-top: 20px;
-        }
-        .form input {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .form button {
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .form button:hover {
-            background: #45a049;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus Ticket Booking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input {
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .seat-list {
+      margin: 20px 0;
+    }
+    .seat {
+      display: inline-block;
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+    .seat.selected {
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="driver">Driver</div>
-        <div class="entry">Entry</div>
-        <h1>Bus Ticket Booking</h1>
-        <div class="seats" id="seatContainer">
-            <!-- Seats will be dynamically generated here -->
-        </div>
-        <div class="info">
-            <p>Selected Seats: <span id="selectedSeats">0</span></p>
-        </div>
-        <div class="form" id="passengerForm" style="display: none;">
-            <h3>Passenger Information</h3>
-            <input type="text" id="name" placeholder="Name" required>
-            <input type="text" id="address" placeholder="Address" required>
-            <input type="text" id="phone" placeholder="Phone Number" required>
-            <input type="email" id="email" placeholder="Email" required>
-            <button onclick="savePassengerInfo()">Save</button>
-        </div>
+  <h1>Bus Ticket Booking</h1>
+  
+  <div class="seat-list">
+    <p>Click on a seat to select:</p>
+    <div id="seat-container">
+      <!-- Seats dynamically generated -->
     </div>
+    <p>Selected Seats: <span id="selected-seats">None</span></p>
+  </div>
 
-    <script>
-        const seatContainer = document.getElementById('seatContainer');
-        const selectedSeatsText = document.getElementById('selectedSeats');
-        const passengerForm = document.getElementById('passengerForm');
-        const nameInput = document.getElementById('name');
-        const addressInput = document.getElementById('address');
-        const phoneInput = document.getElementById('phone');
-        const emailInput = document.getElementById('email');
+  <h2>Passenger Information</h2>
+  <form id="passenger-form">
+    <label for="name">Name</label>
+    <input type="text" id="name" placeholder="Enter your name" required>
 
-        let selectedSeats = [];
-        const googleScriptURL = "https://script.google.com/macros/s/AKfycbx9ZEcKq1xQ82IzjPr9ywWs8BbCg4oZpswuzNyzFI8-TVy9y1UumtwmgMtvDm66cDKD/exec"; // Replace with your Google Apps Script URL
+    <label for="address">Address</label>
+    <input type="text" id="address" placeholder="Enter your address" required>
 
-        // Generate 40 seats dynamically
-        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-        const cols = ['1', '2', '3', '4'];
+    <label for="phone">Phone Number</label>
+    <input type="text" id="phone" placeholder="Enter your phone number" required>
 
-        rows.forEach(row => {
-            cols.forEach(col => {
-                const seat = document.createElement('div');
-                seat.classList.add('seat');
-                seat.textContent = `${row}${col}`;
-                seat.addEventListener('click', () => {
-                    if (seat.classList.contains('occupied')) {
-                        alert('This seat is already occupied!');
-                        return;
-                    }
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="Enter your email" required>
 
-                    if (seat.classList.contains('selected')) {
-                        seat.classList.remove('selected');
-                        selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
-                    } else {
-                        seat.classList.add('selected');
-                        selectedSeats.push(seat.textContent);
-                    }
-                    selectedSeatsText.textContent = selectedSeats.join(', ');
-                    passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
-                });
-                seatContainer.appendChild(seat);
-            });
+    <button type="button" onclick="savePassengerInfo()">Save</button>
+  </form>
+
+  <script>
+    const googleScriptURL = 'https://script.google.com/macros/s/AKfycbyUUxgqbSp5VxqYClyc1-9bIe1CxAl-kHAxOR29xEGCtx21Lgt1Z4QSPtFLiq5995OG/exec';
+    const seats = ["A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"]; // Example seats
+    const selectedSeats = [];
+
+    // Generate seat buttons
+    const seatContainer = document.getElementById('seat-container');
+    seats.forEach(seat => {
+      const seatElement = document.createElement('div');
+      seatElement.className = 'seat';
+      seatElement.textContent = seat;
+      seatElement.onclick = () => toggleSeatSelection(seat, seatElement);
+      seatContainer.appendChild(seatElement);
+    });
+
+    // Toggle seat selection
+    function toggleSeatSelection(seat, seatElement) {
+      const index = selectedSeats.indexOf(seat);
+      if (index > -1) {
+        selectedSeats.splice(index, 1);
+        seatElement.classList.remove('selected');
+      } else {
+        selectedSeats.push(seat);
+        seatElement.classList.add('selected');
+      }
+      document.getElementById('selected-seats').textContent = selectedSeats.join(', ') || 'None';
+    }
+
+    // Save passenger info
+    function savePassengerInfo() {
+      const name = document.getElementById("name").value;
+      const address = document.getElementById("address").value;
+      const phone = document.getElementById("phone").value;
+      const email = document.getElementById("email").value;
+
+      if (selectedSeats.length === 0) {
+        alert("Please select at least one seat.");
+        return;
+      }
+
+      const data = {
+        name,
+        address,
+        phone,
+        email,
+        seats: selectedSeats
+      };
+
+      fetch(googleScriptURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Success:", data);
+          if (data.status === "success") {
+            alert("Data saved successfully!");
+            // Clear form and reset seats
+            document.getElementById('passenger-form').reset();
+            selectedSeats.length = 0;
+            document.getElementById('selected-seats').textContent = 'None';
+            document.querySelectorAll('.seat.selected').forEach(seat => seat.classList.remove('selected'));
+          } else {
+            alert("Error: " + data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Error occurred while saving data.");
         });
-
-        function initializeSeats() {
-            fetch(googleScriptURL)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(seat => {
-                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                        if (seatElement) {
-                            seatElement.classList.add('occupied');
-                        }
-                    });
-                });
-        }
-
-        function savePassengerInfo() {
-            const name = nameInput.value;
-            const address = addressInput.value;
-            const phone = phoneInput.value;
-            const email = emailInput.value;
-
-            if (name && address && phone && email && selectedSeats.length > 0) {
-                fetch(googleScriptURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        seats: selectedSeats,
-                        name,
-                        address,
-                        phone,
-                        email
-                    }),
-                }).then(response => response.text())
-                  .then(() => {
-                      alert('Booking Successful!');
-                      selectedSeats.forEach(seat => {
-                          const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                          if (seatElement) {
-                              seatElement.classList.add('occupied');
-                          }
-                      });
-                      selectedSeats = [];
-                      selectedSeatsText.textContent = '0';
-                      passengerForm.style.display = 'none';
-                      nameInput.value = '';
-                      addressInput.value = '';
-                      phoneInput.value = '';
-                      emailInput.value = '';
-                  });
-            } else {
-                alert('Please fill out all fields.');
-            }
-        }
-
-        // Initialize seats from Google Sheet on page load
-        initializeSeats();
-    </script>
+    }
+  </script>
 </body>
 </html>
