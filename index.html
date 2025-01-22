@@ -140,7 +140,7 @@
         const emailInput = document.getElementById('email');
 
         let selectedSeats = [];
-        const googleScriptURL = "https://script.google.com/macros/s/AKfycbxUY8xzjjZmB1BTtEaNCAycefain071JJru2MPEmzyfsPAEBPQwMRU78wiDBqN5K6JB/exec";
+        const googleScriptURL = "https://script.google.com/macros/s/AKfycbwS9eU4P7oUydg_7X3UH4H6QWldLP1cM0cfUlsuY-zKbSr6ortc2dRMw1sv-kDMYn8/exec";
 
         // Generate 40 seats dynamically
         const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
@@ -186,58 +186,63 @@
                 });
         }
 
-        function savePassengerInfo() {
-            const name = nameInput.value;
-            const address = addressInput.value;
-            const phone = phoneInput.value;
-            const email = emailInput.value;
+       function savePassengerInfo() {
+    const name = nameInput.value;
+    const address = addressInput.value;
+    const phone = phoneInput.value;
+    const email = emailInput.value;
 
-            if (name && address && phone && email && selectedSeats.length > 0) {
-                fetch(googleScriptURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        seats: selectedSeats,
-                        name,
-                        address,
-                        phone,
-                        email
-                    }),
-                }).then(response => response.json())
-                  .then(data => {
-                      if (data.status === "success") {
-                          alert('Booking Successful!');
-                          passengerDetails.innerHTML = `
-                              <strong>Name:</strong> ${name}<br>
-                              <strong>Address:</strong> ${address}<br>
-                              <strong>Phone:</strong> ${phone}<br>
-                              <strong>Email:</strong> ${email}<br>
-                              <strong>Seats:</strong> ${selectedSeats.join(', ')}
-                          `;
-                          passengerInfo.style.display = 'block';
-                          selectedSeats.forEach(seat => {
-                              const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                              if (seatElement) {
-                                  seatElement.classList.add('occupied');
-                              }
-                          });
-                          selectedSeats = [];
-                          selectedSeatsText.textContent = '0';
-                          passengerForm.style.display = 'none';
-                          nameInput.value = '';
-                          addressInput.value = '';
-                          phoneInput.value = '';
-                          emailInput.value = '';
-                      } else {
-                          alert('Error saving booking: ' + data.message);
-                      }
-                  });
+    if (name && address && phone && email && selectedSeats.length > 0) {
+        fetch(googleScriptURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            mode: 'cors', // CORS সমর্থন সক্রিয়
+            body: JSON.stringify({
+                seats: selectedSeats,
+                name,
+                address,
+                phone,
+                email
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert('Booking Successful!');
+                passengerDetails.innerHTML = `
+                    <strong>Name:</strong> ${name}<br>
+                    <strong>Address:</strong> ${address}<br>
+                    <strong>Phone:</strong> ${phone}<br>
+                    <strong>Email:</strong> ${email}<br>
+                    <strong>Seats:</strong> ${selectedSeats.join(', ')}
+                `;
+                passengerInfo.style.display = 'block';
+                selectedSeats.forEach(seat => {
+                    const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                    if (seatElement) {
+                        seatElement.classList.add('occupied');
+                    }
+                });
+                selectedSeats = [];
+                selectedSeatsText.textContent = '0';
+                passengerForm.style.display = 'none';
+                nameInput.value = '';
+                addressInput.value = '';
+                phoneInput.value = '';
+                emailInput.value = '';
             } else {
-                alert('Please fill out all fields.');
+                alert('Error saving booking: ' + data.message);
             }
-        }
+        })
+        .catch(error => {
+            alert('Error: ' + error.message);
+        });
+    } else {
+        alert('Please fill out all fields.');
+    }
+}
 
         // Initialize seats from Google Sheet on page load
         initializeSeats();
