@@ -5,7 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bus Ticket Booking</title>
     <style>
-        /* আপনার আগের CSS কোড এখানে থাকবে */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            position: relative;
+        }
+        .driver {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #000;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .entry {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #2196f3;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .seats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 60px 0 20px;
+        }
+        .seat {
+            width: 50px;
+            height: 50px;
+            background: #ddd;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .seat.selected {
+            background: #4caf50;
+            color: #fff;
+        }
+        .seat.occupied {
+            background: #e74c3c;
+            cursor: not-allowed;
+        }
+        .info {
+            margin-top: 10px;
+        }
+        .form {
+            margin-top: 20px;
+        }
+        .form input {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form button:hover {
+            background: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -13,11 +99,13 @@
         <div class="driver">Driver</div>
         <div class="entry">Entry</div>
         <h1>Bus Ticket Booking</h1>
-        <div class="seats" id="seatContainer"></div>
+        <div class="seats" id="seatContainer">
+            <!-- Seats will be dynamically generated here -->
+        </div>
         <div class="info">
             <p>Selected Seats: <span id="selectedSeats">0</span></p>
         </div>
-        <div class="form" id="passengerForm">
+        <div class="form" id="passengerForm" style="display: none;">
             <h3>Passenger Information</h3>
             <input type="text" id="name" placeholder="Name" required>
             <input type="text" id="address" placeholder="Address" required>
@@ -37,9 +125,9 @@
         const emailInput = document.getElementById('email');
 
         let selectedSeats = [];
-        const googleScriptURL = "https://script.google.com/macros/s/AKfycbzFAVaYJcHIcnck9v41Tht5t2FT8GmaGIBeHl8UjOs7pdAxK5pY0yTrG9lX85HhoN4c/exec"; // এখানে আপনার Google Apps Script URL দিন
+        const googleScriptURL = "https://script.google.com/macros/s/AKfycbxdIHVSnjyytHxX43WozVnTvm7Je0CT9MPCfiWsNcDh8UkpmGS9_4C8z1WM6ZdFRWyV/exec"; // Replace with your Google Apps Script URL
 
-        // সিট জেনারেট করুন
+        // Generate 40 seats dynamically
         const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         const cols = ['1', '2', '3', '4'];
 
@@ -100,28 +188,23 @@
                         phone,
                         email
                     }),
-                })
-                .then(response => response.text())
-                .then(() => {
-                    alert('Booking Successful!');
-                    selectedSeats.forEach(seat => {
-                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                        if (seatElement) {
-                            seatElement.classList.add('occupied');
-                        }
-                    });
-                    selectedSeats = [];
-                    selectedSeatsText.textContent = '0';
-                    passengerForm.style.display = 'none';
-                    nameInput.value = '';
-                    addressInput.value = '';
-                    phoneInput.value = '';
-                    emailInput.value = '';
-                })
-                .catch(error => {
-                    console.error("Error: ", error);
-                    alert('An error occurred while saving data.');
-                });
+                }).then(response => response.text())
+                  .then(() => {
+                      alert('Booking Successful!');
+                      selectedSeats.forEach(seat => {
+                          const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                          if (seatElement) {
+                              seatElement.classList.add('occupied');
+                          }
+                      });
+                      selectedSeats = [];
+                      selectedSeatsText.textContent = '0';
+                      passengerForm.style.display = 'none';
+                      nameInput.value = '';
+                      addressInput.value = '';
+                      phoneInput.value = '';
+                      emailInput.value = '';
+                  });
             } else {
                 alert('Please fill out all fields.');
             }
