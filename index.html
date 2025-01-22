@@ -16,26 +16,13 @@
             height: 100vh;
         }
         .container {
-            display: flex;
-            gap: 20px;
-            max-width: 1200px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
             width: 100%;
-            padding: 20px;
-        }
-        .booking-section {
-            flex: 3;
-            background: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .info-section {
-            flex: 1;
-            background: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            height: 100%;
+            position: relative;
         }
         .driver {
             position: absolute;
@@ -60,12 +47,12 @@
         .seats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin: 40px 0 20px;
+            gap: 5px; /* সিটের দূরত্ব কমানো হয়েছে */
+            margin: 60px 0 20px;
         }
         .seat {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             background: #ddd;
             border-radius: 4px;
             display: flex;
@@ -80,6 +67,9 @@
         .seat.occupied {
             background: #e74c3c;
             cursor: not-allowed;
+        }
+        .info {
+            margin-top: 10px;
         }
         .form {
             margin-top: 20px;
@@ -103,51 +93,56 @@
         .form button:hover {
             background: #45a049;
         }
-        .info-section h3 {
-            margin-bottom: 10px;
-        }
         .passenger-info {
-            background: #f4f4f9;
+            margin-top: 20px;
+            border: 1px solid #ccc;
             padding: 10px;
             border-radius: 4px;
-            margin-bottom: 10px;
+            background: #f9f9f9;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="booking-section">
-            <h1>Bus Ticket Booking</h1>
-            <div class="seats" id="seatContainer">
-                <!-- Seats will be dynamically generated here -->
-            </div>
-            <div class="form" id="passengerForm" style="display: none;">
-                <h3>Passenger Information</h3>
-                <input type="text" id="name" placeholder="Name" required>
-                <input type="text" id="address" placeholder="Address" required>
-                <input type="text" id="phone" placeholder="Phone Number" required>
-                <input type="email" id="email" placeholder="Email" required>
-                <button onclick="savePassengerInfo()">Save</button>
-            </div>
+        <div class="driver">Driver</div>
+        <div class="entry">Entry</div>
+        <h1>Bus Ticket Booking</h1>
+        <div class="seats" id="seatContainer">
+            <!-- Seats will be dynamically generated here -->
         </div>
-        <div class="info-section">
+        <div class="info">
+            <p>Selected Seats: <span id="selectedSeats">0</span></p>
+        </div>
+        <div class="form" id="passengerForm">
+            <h3>Passenger Information</h3>
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="text" id="address" placeholder="Address" required>
+            <input type="text" id="phone" placeholder="Phone Number" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <button onclick="savePassengerInfo()">Save</button>
+        </div>
+        <div class="passenger-info" id="passengerInfo" style="display: none;">
             <h3>Passenger Details</h3>
-            <div id="passengerDetails"></div>
+            <p id="passengerDetails"></p>
         </div>
     </div>
 
     <script>
         const seatContainer = document.getElementById('seatContainer');
+        const selectedSeatsText = document.getElementById('selectedSeats');
         const passengerForm = document.getElementById('passengerForm');
+        const passengerInfo = document.getElementById('passengerInfo');
         const passengerDetails = document.getElementById('passengerDetails');
+
         const nameInput = document.getElementById('name');
         const addressInput = document.getElementById('address');
         const phoneInput = document.getElementById('phone');
         const emailInput = document.getElementById('email');
-        const googleScriptURL = "https://script.google.com/macros/s/AKfycbxw2yUazbK6PkQayYOC2pWprwBDyChiuxPZ1X3TFvHRIcNT2OzTvZHDJ4qO9woeYxQZ/exec";
 
         let selectedSeats = [];
+        const googleScriptURL = "https://script.google.com/macros/s/AKfycbxUY8xzjjZmB1BTtEaNCAycefain071JJru2MPEmzyfsPAEBPQwMRU78wiDBqN5K6JB/exec";
 
+        // Generate 40 seats dynamically
         const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         const cols = ['1', '2', '3', '4'];
 
@@ -161,6 +156,7 @@
                         alert('This seat is already occupied!');
                         return;
                     }
+
                     if (seat.classList.contains('selected')) {
                         seat.classList.remove('selected');
                         selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
@@ -168,6 +164,7 @@
                         seat.classList.add('selected');
                         selectedSeats.push(seat.textContent);
                     }
+                    selectedSeatsText.textContent = selectedSeats.join(', ');
                     passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
                 });
                 seatContainer.appendChild(seat);
@@ -178,12 +175,14 @@
             fetch(googleScriptURL)
                 .then(response => response.json())
                 .then(data => {
-                    data.forEach(seat => {
-                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                        if (seatElement) {
-                            seatElement.classList.add('occupied');
-                        }
-                    });
+                    if (data.seats) {
+                        data.seats.forEach(seat => {
+                            const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
+                            if (seatElement) {
+                                seatElement.classList.add('occupied');
+                            }
+                        });
+                    }
                 });
         }
 
@@ -204,36 +203,36 @@
                         name,
                         address,
                         phone,
-                        email,
+                        email
                     }),
                 }).then(response => response.json())
                   .then(data => {
-                      if (data.error) {
-                          alert(`Error: ${data.error}`);
-                      } else {
+                      if (data.status === "success") {
                           alert('Booking Successful!');
+                          passengerDetails.innerHTML = `
+                              <strong>Name:</strong> ${name}<br>
+                              <strong>Address:</strong> ${address}<br>
+                              <strong>Phone:</strong> ${phone}<br>
+                              <strong>Email:</strong> ${email}<br>
+                              <strong>Seats:</strong> ${selectedSeats.join(', ')}
+                          `;
+                          passengerInfo.style.display = 'block';
                           selectedSeats.forEach(seat => {
                               const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
                               if (seatElement) {
                                   seatElement.classList.add('occupied');
                               }
                           });
-                          passengerDetails.innerHTML += `
-                              <div class="passenger-info">
-                                  <p><strong>Name:</strong> ${name}</p>
-                                  <p><strong>Seats:</strong> ${selectedSeats.join(', ')}</p>
-                              </div>`;
                           selectedSeats = [];
+                          selectedSeatsText.textContent = '0';
                           passengerForm.style.display = 'none';
                           nameInput.value = '';
                           addressInput.value = '';
                           phoneInput.value = '';
                           emailInput.value = '';
+                      } else {
+                          alert('Error saving booking: ' + data.message);
                       }
-                  })
-                  .catch(error => {
-                      console.error('Error saving booking:', error);
-                      alert('Error saving booking. Please try again.');
                   });
             } else {
                 alert('Please fill out all fields.');
