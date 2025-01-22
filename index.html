@@ -22,7 +22,6 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             max-width: 600px;
             width: 100%;
-            position: relative;
         }
         .seats {
             display: grid;
@@ -84,10 +83,11 @@
     </div>
 
     <script type="module">
-        // Firebase configuration
+        // Import Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
 
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAgaXEJG4OcAxfD2-B5H8ZjV6DOohh0Iu8",
             authDomain: "online-bus-ticket-afcfb.firebaseapp.com",
@@ -95,9 +95,11 @@
             projectId: "online-bus-ticket-afcfb",
             storageBucket: "online-bus-ticket-afcfb.firebasestorage.app",
             messagingSenderId: "652012576413",
-            appId: "1:652012576413:web:c512be1f3891d854afbe74"
+            appId: "1:652012576413:web:c512be1f3891d854afbe74",
+            measurementId: "G-BNR9Y1VXTE"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
@@ -108,7 +110,7 @@
         let selectedSeats = [];
 
         // Generate seats
-        const rows = ['A', 'B', 'C', 'D', 'E'];
+        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         const cols = ['1', '2', '3', '4'];
 
         rows.forEach(row => {
