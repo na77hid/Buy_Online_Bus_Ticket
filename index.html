@@ -66,18 +66,20 @@
         .seats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
+            gap: 10px;
             margin: 60px 0 20px;
         }
         .seat {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             background: #ddd;
             border-radius: 4px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
         }
         .seat.selected {
             background: #4caf50;
@@ -157,24 +159,28 @@
         let selectedSeats = [];
 
         // Generate seats
-        rows.forEach(row => {
-            cols.forEach(col => {
-                const seat = document.createElement('div');
-                seat.classList.add('seat');
-                seat.textContent = `${row}${col}`;
-                seat.addEventListener('click', () => {
-                    if (seat.classList.contains('occupied')) return;
-                    if (seat.classList.contains('selected')) {
-                        seat.classList.remove('selected');
-                        selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
-                    } else {
-                        seat.classList.add('selected');
-                        selectedSeats.push(seat.textContent);
-                    }
+        function generateSeats() {
+            rows.forEach(row => {
+                cols.forEach(col => {
+                    const seat = document.createElement('div');
+                    seat.classList.add('seat');
+                    seat.textContent = `${row}${col}`;
+                    seat.addEventListener('click', () => {
+                        if (seat.classList.contains('occupied')) return;
+                        if (seat.classList.contains('selected')) {
+                            seat.classList.remove('selected');
+                            selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
+                        } else {
+                            seat.classList.add('selected');
+                            selectedSeats.push(seat.textContent);
+                        }
+                    });
+                    seatContainer.appendChild(seat);
                 });
-                seatContainer.appendChild(seat);
             });
-        });
+        }
+
+        generateSeats();
 
         function saveBooking() {
             const name = document.getElementById('name').value;
