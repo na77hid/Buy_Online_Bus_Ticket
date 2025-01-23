@@ -15,16 +15,20 @@
         }
 
         .slideshow-container {
-            position: relative;
-            max-width: 100%;
-            margin: auto;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
             overflow: hidden;
         }
 
         .slides {
             display: none;
+            position: absolute;
             width: 100%;
-            height: 100vh;
+            height: 100%;
             object-fit: cover;
         }
 
@@ -161,6 +165,8 @@
         <img class="slides" src="slide3.jpg" alt="Slide 3">
         <img class="slides" src="slide4.jpg" alt="Slide 4">
         <img class="slides" src="slide5.jpg" alt="Slide 5">
+        <img class="slides" src="slide6.jpg" alt="Slide 6">
+        <img class="slides" src="slide7.jpg" alt="Slide 7">
     </div>
 
     <!-- Main Content -->
@@ -250,76 +256,3 @@
                 seatContainer.appendChild(seat);
             });
         });
-
-        // Initialize seats from Firebase
-        function initializeSeats() {
-            const seatsRef = ref(db, 'seats');
-            onValue(seatsRef, snapshot => {
-                const data = snapshot.val();
-                if (data) {
-                    Object.keys(data).forEach(seat => {
-                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                        if (seatElement) {
-                            seatElement.classList.add('occupied');
-                        }
-                    });
-                }
-            });
-        }
-
-        saveButton.addEventListener('click', () => {
-            const name = nameInput.value;
-            const phone = phoneInput.value;
-
-            if (!name || !phone || selectedSeats.length === 0) {
-                alert('Please fill out all fields and select seats.');
-                return;
-            }
-
-            const updates = {};
-            selectedSeats.forEach(seat => {
-                updates[`seats/${seat}`] = { name, phone };
-            });
-
-            // Update Firebase with new bookings
-            update(ref(db), updates)
-                .then(() => {
-                    alert('Booking successful!');
-                    selectedSeats.forEach(seat => {
-                        const seatElement = Array.from(document.querySelectorAll('.seat')).find(s => s.textContent === seat);
-                        if (seatElement) {
-                            seatElement.classList.add('occupied');
-                            seatElement.classList.remove('selected');
-                        }
-                    });
-                    selectedSeats = [];
-                    nameInput.value = '';
-                    phoneInput.value = '';
-                    passengerForm.style.display = 'none';
-                })
-                .catch(error => {
-                    alert('Error saving booking: ' + error.message);
-                });
-        });
-
-        // Initialize seats on page load
-        initializeSeats();
-
-        // Slideshow Functionality
-        let slideIndex = 0;
-        function showSlides() {
-            const slides = document.getElementsByClassName('slides');
-            for (let i = 0; i < slides.length; i++) {
-                slides[i].style.display = 'none';
-            }
-            slideIndex++;
-            if (slideIndex > slides.length) {
-                slideIndex = 1;
-            }
-            slides[slideIndex - 1].style.display = 'block';
-            setTimeout(showSlides, 5000); // Change slide every 5 seconds
-        }
-        showSlides();
-    </script>
-</body>
-</html>
