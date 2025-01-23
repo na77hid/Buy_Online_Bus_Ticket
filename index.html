@@ -67,7 +67,7 @@
 
         .seats {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(2, 1fr) 20px repeat(2, 1fr);
             gap: 8px;
             margin-top: 20px;
         }
@@ -124,6 +124,10 @@
             background: #45a049;
         }
 
+        .aisle {
+            grid-column: span 1;
+        }
+
         @media screen and (max-width: 600px) {
             .container {
                 width: 90%;
@@ -131,7 +135,7 @@
             }
 
             .seats {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
         }
     </style>
@@ -194,10 +198,17 @@
         const cols = ['1', '2', '3', '4'];
 
         rows.forEach(row => {
-            cols.forEach(col => {
+            cols.forEach((col, index) => {
                 const seat = document.createElement('div');
                 seat.classList.add('seat');
                 seat.textContent = `${row}${col}`;
+
+                if (index === 2) {
+                    const aisle = document.createElement('div');
+                    aisle.classList.add('aisle');
+                    seatContainer.appendChild(aisle);
+                }
+
                 seat.addEventListener('click', () => {
                     if (seat.classList.contains('occupied')) {
                         alert('This seat is already occupied!');
