@@ -9,8 +9,8 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
             color: #fff;
+            overflow-x: hidden;
         }
 
         .slideshow-container {
@@ -20,6 +20,7 @@
             width: 100%;
             height: 100%;
             z-index: -1;
+            overflow: hidden;
         }
 
         .slides {
@@ -33,11 +34,12 @@
         .container {
             position: relative;
             z-index: 2;
-            background: rgba(0, 0, 0, 0.7); /* Transparent background */
+            background: rgba(0, 0, 0, 0.6); /* Transparent background */
             border-radius: 8px;
             padding: 20px;
             max-width: 600px;
             margin: 20px auto;
+            overflow-y: auto;
         }
 
         .header {
@@ -55,27 +57,24 @@
             font-size: 14px;
         }
 
-        .entry {
+        .entry, .driver {
             position: relative;
             top: 10px;
-            background: #2196f3;
-            color: #fff;
             padding: 8px 15px;
             border-radius: 4px;
             font-weight: bold;
             display: inline-block;
         }
 
+        .entry {
+            background: #2196f3;
+            color: #fff;
+        }
+
         .driver {
-            position: relative;
-            top: 10px;
             float: right;
             background: #000;
             color: #fff;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: inline-block;
         }
 
         .seats {
@@ -95,7 +94,6 @@
             align-items: center;
             font-size: 12px;
             cursor: pointer;
-            transition: background 0.3s, transform 0.3s;
         }
 
         .seat.selected {
@@ -108,42 +106,8 @@
             cursor: not-allowed;
         }
 
-        .seat:hover {
-            transform: scale(1.1);
-        }
-
         .info {
             margin-top: 10px;
-        }
-
-        .form {
-            margin-top: 20px;
-        }
-
-        .form input {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .form button {
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .form button:hover {
-            background: #45a049;
-        }
-
-        .aisle {
-            grid-column: span 1;
         }
 
         @media screen and (max-width: 600px) {
@@ -164,10 +128,6 @@
         <img class="slides" src="slide1.jpg" alt="Slide 1">
         <img class="slides" src="slide2.jpg" alt="Slide 2">
         <img class="slides" src="slide3.jpg" alt="Slide 3">
-        <img class="slides" src="slide4.jpg" alt="Slide 4">
-        <img class="slides" src="slide5.jpg" alt="Slide 5">
-        <img class="slides" src="slide6.jpg" alt="Slide 6">
-        <img class="slides" src="slide7.jpg" alt="Slide 7">
     </div>
 
     <!-- Main Content -->
@@ -182,44 +142,14 @@
         </div>
         <div class="entry">প্রবেশ গেট</div>
         <div class="driver">ড্রাইভার</div>
-        <div class="seats" id="seatContainer">
-            <!-- Seats will be dynamically generated here -->
-        </div>
+        <div class="seats" id="seatContainer"></div>
         <div class="info">
             <p>Selected Seats: <span id="selectedSeats">0</span></p>
         </div>
     </div>
 
     <script>
-        const seatContainer = document.getElementById('seatContainer');
-        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-        const cols = ['1', '2', '3', '4'];
-
-        rows.forEach(row => {
-            cols.forEach((col, index) => {
-                const seat = document.createElement('div');
-                seat.classList.add('seat');
-                seat.textContent = `${row}${col}`;
-
-                if (index === 2) {
-                    const aisle = document.createElement('div');
-                    aisle.classList.add('aisle');
-                    seatContainer.appendChild(aisle);
-                }
-
-                seat.addEventListener('click', () => {
-                    if (seat.classList.contains('occupied')) {
-                        alert('This seat is already occupied!');
-                        return;
-                    }
-
-                    seat.classList.toggle('selected');
-                });
-
-                seatContainer.appendChild(seat);
-            });
-        });
-
+        // Slideshow Functionality
         let slideIndex = 0;
 
         function showSlides() {
@@ -228,9 +158,11 @@
                 slides[i].style.display = 'none';
             }
             slideIndex++;
-            if (slideIndex > slides.length) slideIndex = 1;
+            if (slideIndex > slides.length) {
+                slideIndex = 1;
+            }
             slides[slideIndex - 1].style.display = 'block';
-            setTimeout(showSlides, 30000); // Change slide every 30 seconds
+            setTimeout(showSlides, 3000); // Change slide every 3 seconds
         }
 
         showSlides();
