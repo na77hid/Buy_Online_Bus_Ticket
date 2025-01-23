@@ -95,6 +95,7 @@
             align-items: center;
             font-size: 12px;
             cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
         }
 
         .seat.selected {
@@ -105,6 +106,10 @@
         .seat.occupied {
             background: #e74c3c;
             cursor: not-allowed;
+        }
+
+        .seat:hover {
+            transform: scale(1.1);
         }
 
         .info {
@@ -183,15 +188,38 @@
         <div class="info">
             <p>Selected Seats: <span id="selectedSeats">0</span></p>
         </div>
-        <div class="form" id="passengerForm" style="display: none;">
-            <h3>Passenger Information</h3>
-            <input type="text" id="name" placeholder="Name" required>
-            <input type="text" id="phone" placeholder="Phone Number" required>
-            <button id="saveButton">Save</button>
-        </div>
     </div>
 
     <script>
+        const seatContainer = document.getElementById('seatContainer');
+        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        const cols = ['1', '2', '3', '4'];
+
+        rows.forEach(row => {
+            cols.forEach((col, index) => {
+                const seat = document.createElement('div');
+                seat.classList.add('seat');
+                seat.textContent = `${row}${col}`;
+
+                if (index === 2) {
+                    const aisle = document.createElement('div');
+                    aisle.classList.add('aisle');
+                    seatContainer.appendChild(aisle);
+                }
+
+                seat.addEventListener('click', () => {
+                    if (seat.classList.contains('occupied')) {
+                        alert('This seat is already occupied!');
+                        return;
+                    }
+
+                    seat.classList.toggle('selected');
+                });
+
+                seatContainer.appendChild(seat);
+            });
+        });
+
         let slideIndex = 0;
 
         function showSlides() {
