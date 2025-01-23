@@ -9,19 +9,10 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: #000;
+            background: url('bus_background.jpg') no-repeat center center fixed;
+            background-size: cover;
             color: #fff;
             overflow: hidden;
-        }
-
-        .video-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            object-fit: cover;
         }
 
         .container {
@@ -134,12 +125,6 @@
     </style>
 </head>
 <body>
-    <!-- Background Video -->
-    <video class="video-background" autoplay loop muted>
-        <source src="bus_animation.mp4" type="video/mp4">
-        আপনার ব্রাউজার ভিডিও সমর্থন করে না।
-    </video>
-
     <!-- Main Content -->
     <div class="container">
         <div class="header">
