@@ -9,9 +9,8 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: #000;
-            color: #fff;
             overflow-x: hidden;
+            color: #fff;
         }
 
         .slideshow-container {
@@ -20,27 +19,25 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
-            overflow: hidden;
+            z-index: -1;
         }
 
         .slides {
-            display: none;
             position: absolute;
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: none;
         }
 
         .container {
             position: relative;
             z-index: 2;
-            background: rgba(0, 0, 0, 0.6); /* Transparent background */
+            background: rgba(0, 0, 0, 0.7); /* Transparent background */
             border-radius: 8px;
             padding: 20px;
             max-width: 600px;
             margin: 20px auto;
-            overflow-y: auto;
         }
 
         .header {
@@ -61,7 +58,6 @@
         .entry {
             position: relative;
             top: 10px;
-            left: 0;
             background: #2196f3;
             color: #fff;
             padding: 8px 15px;
@@ -195,64 +191,21 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
+    <script>
+        let slideIndex = 0;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAgaXEJG4OcAxfD2-B5H8ZjV6DOohh0Iu8",
-            authDomain: "online-bus-ticket-afcfb.firebaseapp.com",
-            databaseURL: "https://online-bus-ticket-afcfb-default-rtdb.firebaseio.com",
-            projectId: "online-bus-ticket-afcfb",
-            storageBucket: "online-bus-ticket-afcfb.appspot.com",
-            messagingSenderId: "652012576413",
-            appId: "1:652012576413:web:c512be1f3891d854afbe74",
-            measurementId: "G-BNR9Y1VXTE"
-        };
+        function showSlides() {
+            const slides = document.getElementsByClassName('slides');
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.display = 'none';
+            }
+            slideIndex++;
+            if (slideIndex > slides.length) slideIndex = 1;
+            slides[slideIndex - 1].style.display = 'block';
+            setTimeout(showSlides, 30000); // Change slide every 30 seconds
+        }
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        const seatContainer = document.getElementById('seatContainer');
-        const saveButton = document.getElementById('saveButton');
-        const nameInput = document.getElementById('name');
-        const phoneInput = document.getElementById('phone');
-        const passengerForm = document.getElementById('passengerForm');
-
-        let selectedSeats = [];
-
-        // Generate 40 seats dynamically
-        const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-        const cols = ['1', '2', '3', '4'];
-
-        rows.forEach(row => {
-            cols.forEach((col, index) => {
-                const seat = document.createElement('div');
-                seat.classList.add('seat');
-                seat.textContent = `${row}${col}`;
-
-                if (index === 2) {
-                    const aisle = document.createElement('div');
-                    aisle.classList.add('aisle');
-                    seatContainer.appendChild(aisle);
-                }
-
-                seat.addEventListener('click', () => {
-                    if (seat.classList.contains('occupied')) {
-                        alert('This seat is already occupied!');
-                        return;
-                    }
-
-                    if (seat.classList.contains('selected')) {
-                        seat.classList.remove('selected');
-                        selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
-                    } else {
-                        seat.classList.add('selected');
-                        selectedSeats.push(seat.textContent);
-                    }
-                    passengerForm.style.display = selectedSeats.length > 0 ? 'block' : 'none';
-                    document.getElementById('selectedSeats').textContent = selectedSeats.length;
-                });
-                seatContainer.appendChild(seat);
-            });
-        });
+        showSlides();
+    </script>
+</body>
+</html>
