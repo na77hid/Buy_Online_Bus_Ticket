@@ -9,10 +9,20 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: url('bus_background.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background: #000;
             color: #fff;
             overflow-x: hidden;
+        }
+
+        .slideshow-container {
+            position: relative;
+            max-width: 100%;
+            margin: auto;
+        }
+
+        .slides {
+            display: none;
+            width: 100%;
         }
 
         .container {
@@ -141,12 +151,21 @@
     </style>
 </head>
 <body>
+    <!-- Slideshow Container -->
+    <div class="slideshow-container">
+        <img class="slides" src="slide1.jpg" alt="Slide 1">
+        <img class="slides" src="slide2.jpg" alt="Slide 2">
+        <img class="slides" src="slide3.jpg" alt="Slide 3">
+        <img class="slides" src="slide4.jpg" alt="Slide 4">
+        <img class="slides" src="slide5.jpg" alt="Slide 5">
+    </div>
+
     <!-- Main Content -->
     <div class="container">
         <div class="header">
             <h1>বাস টিকিট বুকিং সিস্টেম</h1>
             <p>স্থানঃ সিংড়া টু লালপুর</p>
-            <p>তারিখঃ ০৮ ফেব্রুয়ারী ২০২৫ রোজঃ শনিবার</p>
+            <p>তারিখঃ ০৮ ফেব্রুয়ারী ২০২৫</p>
             <p>সময়ঃ সকাল ৮:০০ টা</p>
             <p>প্রতি সিট মূল্যঃ ৪৫০/- টাকা</p>
             <p>যেকোনো তথ্য ও সহায়তা পেতে যোগাযোগ করুন- ০১৫১৮৩৩৫৭৩২</p>
@@ -282,6 +301,22 @@
 
         // Initialize seats on page load
         initializeSeats();
+
+        // Slideshow Functionality
+        let slideIndex = 0;
+        function showSlides() {
+            const slides = document.getElementsByClassName('slides');
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.display = 'none';
+            }
+            slideIndex++;
+            if (slideIndex > slides.length) {
+                slideIndex = 1;
+            }
+            slides[slideIndex - 1].style.display = 'block';
+            setTimeout(showSlides, 30000); // Change slide every 30 seconds
+        }
+        showSlides();
     </script>
 </body>
 </html>
