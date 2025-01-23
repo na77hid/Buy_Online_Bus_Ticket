@@ -18,11 +18,14 @@
             position: relative;
             max-width: 100%;
             margin: auto;
+            overflow: hidden;
         }
 
         .slides {
             display: none;
             width: 100%;
+            height: 100vh;
+            object-fit: cover;
         }
 
         .container {
@@ -314,7 +317,7 @@
                 slideIndex = 1;
             }
             slides[slideIndex - 1].style.display = 'block';
-            setTimeout(showSlides, 30000); // Change slide every 30 seconds
+            setTimeout(showSlides, 5000); // Change slide every 5 seconds
         }
         showSlides();
     </script>
