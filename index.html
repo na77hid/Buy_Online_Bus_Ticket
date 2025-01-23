@@ -67,29 +67,18 @@
         }
 
         .entry {
-    position: absolute;
-    top: 50px; /* প্রবেশ গেটের উপরের অবস্থান */
-    left: 10%; /* A1 এর উপরে অবস্থান */
-    background: #2196f3;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-weight: bold;
-    z-index: 3;
-    text-align: center;
-}
+            top: 50px;
+            left: 10%;
+            z-index: 3;
+            text-align: center;
+        }
 
-.driver {
-    position: absolute;
-    top: 50px; /* ড্রাইভারের উপরের অবস্থান */
-    right: 10%; /* A4 এর উপরে অবস্থান */
-    background: black;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-weight: bold;
-    z-index: 3;
-    text-align: center;
+        .driver {
+            top: 50px;
+            right: 10%;
+            background: black;
+            z-index: 3;
+            text-align: center;
         }
 
         .seats {
@@ -135,6 +124,16 @@
 
         @media screen and (max-width: 600px) {
             .container { width: 90%; }
+
+            .entry {
+                top: 30px;
+                left: 5%;
+            }
+
+            .driver {
+                top: 30px;
+                right: 5%;
+            }
         }
     </style>
 </head>
@@ -144,21 +143,21 @@
         <div class="slide" style="background-image: url('slide1.jpg');"></div>
         <div class="slide" style="background-image: url('slide2.jpg');"></div>
         <div class="slide" style="background-image: url('slide3.jpg');"></div>
-         <div class="slide" style="background-image: url('slide4.jpg');"></div>
-         <div class="slide" style="background-image: url('slide5.jpg');"></div>
-         <div class="slide" style="background-image: url('slide6.jpg');"></div>
-         <div class="slide" style="background-image: url('slide7.jpg');"></div>
+        <div class="slide" style="background-image: url('slide4.jpg');"></div>
+        <div class="slide" style="background-image: url('slide5.jpg');"></div>
+        <div class="slide" style="background-image: url('slide6.jpg');"></div>
+        <div class="slide" style="background-image: url('slide7.jpg');"></div>
     </div>
 
     <!-- Main Content -->
     <div class="container">
         <div class="header">
             <h1>বাস টিকিট বুকিং সিস্টেম</h1>
-            <p>স্থানঃ সিংড়া টু লালপুর</p>
-            <p>তারিখঃ ০৮ ফেব্রুয়ারী ২০২৫ রোজঃ শনিবার</p>
-            <p>সময়ঃ সকাল ৮:০০ টা</p>
+            <p>স্থানঃ সিংড়া টু লালপুর</p>
+            <p>তারিখঃ ০৮ ফেব্রুয়ারী ২০২৫ রোজঃ শনিবার</p>
+            <p>সময়ঃ সকাল ৮:০০ টা</p>
             <p>প্রতি সিট মূল্যঃ ৪৫০/- টাকা</p>
-            <p>যেকোনো তথ্য ও সহায়তা পেতে যোগাযোগ করুন- ০১৫১৮৩৩৫৭৩২</p>
+            <p>যেকোনো তথ্য ও সহায়তা পেতে যোগাযোগ করুন- ০১৫১৮৩৩৫৭৩২</p>
         </div>
         <div class="entry">প্রবেশ গেট</div>
         <div class="driver">ড্রাইভার</div>
